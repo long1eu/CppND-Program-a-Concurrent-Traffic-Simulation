@@ -59,12 +59,12 @@ void TrafficLight::cycleThroughPhases() {
   std::mt19937 eng(rd());
   std::uniform_int_distribution<> distr(4000, 6000);
 
+  int cycleDuration = distr(eng);
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     int timeSinceLastUpdate =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastUpdate).count();
 
-    int cycleDuration = distr(eng);
     if (timeSinceLastUpdate >= cycleDuration) {
       lastUpdate = std::chrono::system_clock::now();
       if (_currentPhase == TrafficLightPhase::red) {
@@ -73,8 +73,7 @@ void TrafficLight::cycleThroughPhases() {
         _currentPhase = TrafficLightPhase::red;
       }
 
-      TrafficLightPhase message = _currentPhase;
-      std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send, _queue, std::move(message));
+      std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send, _queue, std::move(_currentPhase));
     }
   }
 }
