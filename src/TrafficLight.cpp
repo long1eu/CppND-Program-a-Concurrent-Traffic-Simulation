@@ -1,10 +1,9 @@
 #include <iostream>
 #include <random>
+#include <future>
 #include "TrafficLight.h"
 
 /* Implementation of class "MessageQueue" */
-
-std::shared_ptr<MessageQueue<int>> msgQueue(new MessageQueue<int>);
 
 template<typename T>
 T MessageQueue<T>::receive() {
@@ -16,7 +15,7 @@ T MessageQueue<T>::receive() {
   });
 
   T msg = std::move(_queue.back());
-  _queue.clear();
+  _queue.pop_back();
   return msg;
 }
 
@@ -37,8 +36,8 @@ TrafficLight::TrafficLight() {
 
 void TrafficLight::waitForGreen() {
   while (true) {
-    TrafficLightPhase color;
-    if (msgQueue->receive() == TrafficLightPhase::green) {
+    TrafficLightPhase color = _queue->receive();
+    if (color == TrafficLightPhase::green) {
       return;
     }
   }
@@ -55,7 +54,6 @@ void TrafficLight::simulate() {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void TrafficLight::cycleThroughPhases() {
-  std::shared_ptr<MessageQueue<int>> messQueue(new MessageQueue<int>);
   std::chrono::time_point<std::chrono::system_clock> lastUpdate = std::chrono::system_clock::now();
   std::random_device rd;
   std::mt19937 eng(rd());
@@ -74,7 +72,9 @@ void TrafficLight::cycleThroughPhases() {
       } else {
         _currentPhase = TrafficLightPhase::red;
       }
-      msgQueue->send(_currentPhase);
+
+      TrafficLightPhase message = _currentPhase;
+      std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send, _queue, std::move(message));
     }
   }
 }

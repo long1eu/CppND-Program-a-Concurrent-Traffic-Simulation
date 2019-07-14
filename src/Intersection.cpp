@@ -70,9 +70,8 @@ void Intersection::addVehicleToQueue(const std::shared_ptr<Vehicle> &vehicle) {
   lck.lock();
   std::cout << "Intersection #" << _id << ": Vehicle #" << vehicle->getID() << " is granted entry." << std::endl;
 
-  TrafficLight Tl;
-  if (Tl.getCurrentPhase() == TrafficLightPhase::red) {
-    Tl.waitForGreen();
+  if (_trafficLight.getCurrentPhase() == TrafficLightPhase::red) {
+    _trafficLight.waitForGreen();
   }
 
   lck.unlock();
@@ -87,7 +86,7 @@ void Intersection::setIsBlocked(bool isBlocked) {
 }
 
 void Intersection::simulate() {
-  Intersection::_trafficLight.simulate();
+  _trafficLight.simulate();
 
   threads.emplace_back(std::thread(&Intersection::processVehicleQueue, this));
 }

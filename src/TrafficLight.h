@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <iostream>
 #include <deque>
 #include <condition_variable>
 #include "TrafficObject.h"
@@ -11,7 +12,6 @@ enum TrafficLightPhase { red, green };
 template<class T>
 class MessageQueue {
  public:
-  MessageQueue() = default;
   T receive();
   void send(T &&msg);
 
