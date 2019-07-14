@@ -36,8 +36,7 @@ TrafficLight::TrafficLight() {
 
 void TrafficLight::waitForGreen() {
   while (true) {
-    TrafficLightPhase color = _queue->receive();
-    if (color == TrafficLightPhase::green) {
+    if (_queue->receive() == TrafficLightPhase::green) {
       return;
     }
   }
